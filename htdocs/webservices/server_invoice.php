@@ -242,7 +242,7 @@ $server->register(
 $server->register(
     'createInvoice',
     // Entry values
-    array('authentication'=>'tns:authentication','invoice'=>'tns:invoice'),
+    array('authentication'=>'tns:authentication','invoice'=>'tns:invoice','id_warehouse' => 'xsd:string'),
     // Exit values
     array('result'=>'tns:result','id'=>'xsd:string','ref'=>'xsd:string','ref_ext'=>'xsd:string'),
     $ns,
@@ -266,7 +266,7 @@ $server->register(
 $server->register(
     'updateInvoice',
     // Entry values
-    array('authentication'=>'tns:authentication','invoice'=>'tns:invoice'),
+    array('authentication'=>'tns:authentication','invoice'=>'tns:invoice','id_warehouse'=>'xsd:string'),
     // Exit values
     array('result'=>'tns:result','id'=>'xsd:string','ref'=>'xsd:string','ref_ext'=>'xsd:string'),
     $ns,
@@ -532,9 +532,10 @@ function getInvoicesForThirdParty($authentication,$idthirdparty)
  *
  * @param	array		$authentication		Array of authentication information
  * @param	Facture		$invoice			Invoice
+ * @param	int			$id_warehouse		Warehouse identifiant 
  * @return	array							Array result
  */
-function createInvoice($authentication,$invoice)
+function createInvoice($authentication,$invoice,$id_warehouse=0)
 {
     global $db,$conf,$langs;
 
@@ -614,7 +615,7 @@ function createInvoice($authentication,$invoice)
 
         if (!$error && $invoice['status'] == Facture::STATUS_VALIDATED)   // We want invoice to have status validated
         {
-            $result=$new_invoice->validate($fuser);
+            $result=$new_invoice->validate($fuser,'',$id_warehouse);
             if ($result < 0)
             {
                 $error++;
@@ -740,9 +741,10 @@ function createInvoiceFromOrder($authentication,$id_order='', $ref_order='', $re
  *
  * @param	array		$authentication		Array of authentication information
  * @param	Facture		$invoice			Invoice
+ * @param	int			$id_warehouse		Warehouse identifiant
  * @return	array							Array result
  */
-function updateInvoice($authentication,$invoice)
+function updateInvoice($authentication,$invoice,$id_warehouse=0)
 {
 	global $db,$conf,$langs;
 
@@ -779,11 +781,11 @@ function updateInvoice($authentication,$invoice)
 			{
 				if ($invoice['status'] == Facture::STATUS_DRAFT)
 				{
-					$result = $object->set_draft($fuser);
+					$result = $object->set_draft($fuser,$id_warehouse);
 				}
 				if ($invoice['status'] == Facture::STATUS_VALIDATED)
 				{
-					$result = $object->validate($fuser);
+					$result = $object->validate($fuser,'',$id_warehouse);
 						
 					if ($result	>= 0)
 					{
